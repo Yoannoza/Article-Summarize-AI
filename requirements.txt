@@ -1,0 +1,7 @@
+flask
+transformers
+torch
+newspaper3k
+lxml
+pillow
+python-dotenv
