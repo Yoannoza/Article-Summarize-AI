@@ -2,6 +2,6 @@ flask
 transformers
 torch
 newspaper3k
-lxml
+lxml-html-clean
 pillow
 python-dotenv
