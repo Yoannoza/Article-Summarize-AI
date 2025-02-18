@@ -44,7 +44,7 @@ def resume_article():
 
         except Exception as e:
             return jsonify({'error': str(e)}), 500
-    elif data.get('url'):
+    elif data.get('text'):
         text = data.get('text')
 
         if not text:
@@ -59,6 +59,8 @@ def resume_article():
 
         except Exception as e:
             return jsonify({'error': str(e)}), 500
+    else:
+        return jsonify({'error': "No Link, No Text"}), 500
         
 
 
