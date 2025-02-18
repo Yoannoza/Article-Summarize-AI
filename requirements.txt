@@ -5,3 +5,4 @@ newspaper3k
 lxml-html-clean
 pillow
 python-dotenv
+streamlit
