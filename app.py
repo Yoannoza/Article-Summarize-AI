@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import requests
+from newspaper import Article
 from dotenv import load_dotenv
 import os
 
@@ -29,10 +30,10 @@ def resume_article():
         return jsonify({'error': 'URL manquante'}), 400
 
     try:
-        from newspaper import Article
         article = Article(url)
         article.download()
         article.parse()
+        print(article.text)
 
         summary = get_summary(article.text)
         print(summary)
