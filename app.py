@@ -24,28 +24,42 @@ def get_summary(article_text):
 @app.route('/resume', methods=['POST'])
 def resume_article():
     data = request.get_json()
-    url = data.get('url')
+    if data.get('url'):
+        url = data.get('url')
 
-    if not url:
-        return jsonify({'error': 'URL manquante'}), 400
+        if not url:
+            return jsonify({'error': 'URL manquante'}), 400
 
-    try:
-        article = Article(url)
-        article.download()
-        article.parse()
-        print(article.text)
+        try:
+            article = Article(url)
+            article.download()
+            article.parse()
+            summary = get_summary(article.text)
 
-        summary = get_summary(article.text)
-        print(summary)
+            return jsonify({
+                'title': article.title,
+                'url': url,
+                'resume': summary
+            })
 
-        return jsonify({
-            'title': article.title,
-            'url': url,
-            'resume': summary
-        })
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+    elif data.get('url'):
+        text = data.get('text')
 
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        if not text:
+            return jsonify({'error': 'Texte manquant'}), 400
+
+        try:
+            summary = get_summary(text)
+
+            return jsonify({
+                'resume': summary
+            })
+
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
+        
 
 
 if __name__ == '__main__':
