@@ -35,6 +35,7 @@ def resume_article():
         article.parse()
 
         summary = get_summary(article.text)
+        print(summary)
 
         return jsonify({
             'title': article.title,
