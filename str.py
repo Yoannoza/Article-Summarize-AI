@@ -26,7 +26,7 @@ st.write("Obtenez rapidement l'essentiel d'un article à partir de son URL ou d'
 option = st.radio("Choisissez une option", ["Résumé d'un article via URL", "Résumé d'un texte saisi"])
 
 # L'API URL de FastAPI
-API_URL = "http://localhost:8000/resume"  # Assurez-vous d'utiliser l'URL correcte de votre API FastAPI
+API_URL = "https://summurize-api-5069ac36b480.herokuapp.com/resume"  # Assurez-vous d'utiliser l'URL correcte de votre API FastAPI
 
 # Fonction pour générer le résumé via l'API FastAPI
 def generate_summary(data):
