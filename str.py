@@ -31,7 +31,7 @@ if option == "Résumé d'un article via URL":
         if article_url:
             with st.spinner('Analyse en cours...'):
                 try:
-                    response = requests.post("https://article-summarize-ai.onrender.com/resume", json={'url': article_url})
+                    response = requests.post("https://summurize-api-5069ac36b480.herokuapp.com/resume", json={'url': article_url})
                     data = response.json()
                     if response.status_code == 200 and 'resume' in data:
                         st.success("Résumé généré avec succès!")

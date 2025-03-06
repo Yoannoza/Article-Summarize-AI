@@ -1,4 +1,6 @@
-flask
+fastapi
+uvicorn
+pydantic
 newspaper3k
 lxml-html-clean
 pillow
