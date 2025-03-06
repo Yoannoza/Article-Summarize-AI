@@ -1,5 +1,4 @@
 flask
-transformers
 newspaper3k
 lxml-html-clean
 pillow
