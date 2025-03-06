@@ -25,42 +25,57 @@ st.write("Obtenez rapidement l'essentiel d'un article à partir de son URL ou d'
 # Choix de la méthode
 option = st.radio("Choisissez une option", ["Résumé d'un article via URL", "Résumé d'un texte saisi"])
 
+# L'API URL de FastAPI
+API_URL = "http://localhost:8000/resume"  # Assurez-vous d'utiliser l'URL correcte de votre API FastAPI
+
+# Fonction pour générer le résumé via l'API FastAPI
+def generate_summary(data):
+    try:
+        response = requests.post(API_URL, json=data)
+        response.raise_for_status()  # Pour lever une exception si la réponse n'est pas 200
+        data = response.json()
+        
+        if 'resume' in data:
+            return data
+        else:
+            st.error(f"Erreur : {data.get('error', 'Réponse inattendue')}")
+            return None
+    except requests.exceptions.RequestException as e:
+        st.error(f"Une erreur est survenue : {e}")
+        return None
+
 if option == "Résumé d'un article via URL":
     article_url = st.text_input("Collez l'URL de l'article ici")
+    model = st.selectbox("Choisissez le modèle", ["pegasus", "bart", "flan-t5"], index=0)
+    
     if st.button("Générer le résumé"):
         if article_url:
             with st.spinner('Analyse en cours...'):
-                try:
-                    response = requests.post("https://summurize-api-5069ac36b480.herokuapp.com/resume", json={'url': article_url})
-                    data = response.json()
-                    if response.status_code == 200 and 'resume' in data:
-                        st.success("Résumé généré avec succès!")
-                        st.subheader(data.get('title', 'Titre indisponible'))
-                        st.markdown(f"🔗 [Lien vers l'article]({data.get('url')})")
-                        st.markdown(f"### 📝 Résumé :")
-                        st.write(data.get('resume'))
-                    else:
-                        st.error(f"Erreur: {data.get('error', 'Réponse inattendue')}")
-                except Exception as e:
-                    st.error(f"Une erreur est survenue : {e}")
+                data = {'url': article_url, 'model': model}
+                result = generate_summary(data)
+                
+                if result:
+                    st.success("Résumé généré avec succès!")
+                    st.subheader(result.get('title', 'Titre indisponible'))
+                    st.markdown(f"🔗 [Lien vers l'article]({result.get('url')})")
+                    st.markdown(f"### 📝 Résumé :")
+                    st.write(result.get('resume'))
         else:
             st.warning("Veuillez entrer une URL valide.")
 
 elif option == "Résumé d'un texte saisi":
     user_text = st.text_area("Collez votre texte ici")
+    model = st.selectbox("Choisissez le modèle", ["pegasus", "bart", "flan-t5"], index=0)
+    
     if st.button("Résumer le texte"):
         if user_text:
             with st.spinner('Résumé en cours...'):
-                try:
-                    response = requests.post("https://article-summarize-ai.onrender.com/resume", json={'text': user_text})
-                    data = response.json()
-                    if response.status_code == 200 and 'resume' in data:
-                        st.success("Résumé généré avec succès!")
-                        st.markdown(f"### 📝 Résumé :")
-                        st.write(data.get('resume'))
-                    else:
-                        st.error(f"Erreur: {data.get('error', 'Réponse inattendue')}")
-                except Exception as e:
-                    st.error(f"Une erreur est survenue : {e}")
+                data = {'text': user_text, 'model': model}
+                result = generate_summary(data)
+                
+                if result:
+                    st.success("Résumé généré avec succès!")
+                    st.markdown(f"### 📝 Résumé :")
+                    st.write(result.get('resume'))
         else:
             st.warning("Veuillez entrer du texte à résumer.")
