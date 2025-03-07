@@ -15,7 +15,14 @@ HEADERS = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
 MODELS = {
     "pegasus": "google/pegasus-cnn_dailymail",
     "bart": "facebook/bart-large-cnn",
-    "flan-t5": "google/flan-t5-large"
+    "flan-t5": "google/flan-t5-large",
+    "distilbart": "sshleifer/distilbart-cnn-12-6",
+    "t5": "t5-base",
+    "longt5": "google/long-t5-tglobal-base",
+    "led": "allenai/led-base-16384",
+    "mbart": "facebook/mbart-large-50",
+    "mistral": "mistralai/Mistral-7B-Instruct-v0.2",
+    "llama2": "meta-llama/Llama-2-7b-chat",
 }
 
 app = FastAPI()
@@ -85,31 +92,3 @@ def health_check():
         statuses[name] = "ok" if response.status_code == 200 else "indisponible"
 
     return statuses
-
-
-@app.post("/benchmark")
-def benchmark_article(request: ArticleRequest):
-    """Tester un même article avec tous les modèles"""
-    if not (request.url or request.text):
-        raise HTTPException(status_code=400, detail="Ni URL ni texte fournis")
-
-    if request.url:
-        article = Article(request.url)
-        article.download()
-        article.parse()
-        article_text = article.text
-    else:
-        article_text = request.text
-
-    results = {}
-    for model_name in MODELS.keys():
-        try:
-            summary = get_summary(article_text, model_name)
-            results[model_name] = summary
-        except Exception as e:
-            results[model_name] = f"Erreur: {str(e)}"
-
-    return {
-        'url': request.url,
-        'results': results
-    }

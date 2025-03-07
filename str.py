@@ -44,9 +44,15 @@ def generate_summary(data):
         st.error(f"Une erreur est survenue : {e}")
         return None
 
+# Liste des modèles disponibles
+models = [
+    "pegasus", "bart", "flan-t5", "distilbart", "t5", 
+    "longt5", "led", "mbart", "mistral", "llama2"
+]
+
 if option == "Résumé d'un article via URL":
     article_url = st.text_input("Collez l'URL de l'article ici")
-    model = st.selectbox("Choisissez le modèle", ["pegasus", "bart", "flan-t5"], index=0)
+    model = st.selectbox("Choisissez le modèle", models, index=0)
     
     if st.button("Générer le résumé"):
         if article_url:
@@ -65,7 +71,7 @@ if option == "Résumé d'un article via URL":
 
 elif option == "Résumé d'un texte saisi":
     user_text = st.text_area("Collez votre texte ici")
-    model = st.selectbox("Choisissez le modèle", ["pegasus", "bart", "flan-t5"], index=0)
+    model = st.selectbox("Choisissez le modèle", models, index=0)
     
     if st.button("Résumer le texte"):
         if user_text:
