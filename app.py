@@ -85,10 +85,33 @@ def resume_article(request: ArticleRequest):
 
 @app.get("/health")
 def health_check():
-    """Vérifie si tous les modèles sont dispos"""
+    """Vérifie si tous les modèles sont dispos et gère les erreurs comme l'authentification, timeout, etc."""
     statuses = {}
+
+    # On parcourt chaque modèle et on fait une requête GET pour vérifier sa disponibilité
     for name, model_path in MODELS.items():
-        response = requests.get(f"https://api-inference.huggingface.co/models/{model_path}", headers=HEADERS)
-        statuses[name] = "ok" if response.status_code == 200 else "indisponible"
+        try:
+            # Essayer d'obtenir la réponse du modèle
+            response = requests.get(f"https://api-inference.huggingface.co/models/{model_path}", headers=HEADERS, timeout=10)
+
+            # Vérification de la réponse en fonction du code de statut
+            if response.status_code == 200:
+                statuses[name] = "OK"
+            elif response.status_code == 403:
+                statuses[name] = "Accès interdit (erreur d'authentification)"
+            elif response.status_code == 404:
+                statuses[name] = "Modèle non trouvé"
+            elif response.status_code == 500:
+                statuses[name] = "Erreur serveur interne"
+            else:
+                statuses[name] = f"Erreur inconnue: {response.status_code}"
+        
+        except requests.exceptions.Timeout:
+            statuses[name] = "Erreur: Timeout (Le serveur met trop de temps à répondre)"
+        except requests.exceptions.TooManyRedirects:
+            statuses[name] = "Erreur: Trop de redirections"
+        except requests.exceptions.RequestException as e:
+            # Gestion générale de toutes les autres erreurs
+            statuses[name] = f"Erreur de requête: {str(e)}"
 
     return statuses
