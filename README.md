@@ -8,6 +8,18 @@ https://gamma.app/docs/Untitled-k5cnybpu8oa2eh2
 
 Ce projet propose une **API web** et une **interface utilisateur Streamlit** pour **résumer automatiquement des articles de presse** ou tout autre texte. L’utilisateur peut soit **fournir une URL d’article**, soit **coller un texte** directement. Le résumé est généré par **l'un des 4 modèles supportés**, sélectionnables à la demande :
 
+# Liens Utiles du Projet Résumeur d'Articles
+
+Voici une liste des liens importants pour accéder aux différentes composantes et documentations du projet :
+
+*   **Rapport du Projet:** [https://docs.google.com/document/d/1UusLQ0YVF88XU1lfsWYgqSTTBe9FSG6c65Mlehg2fqc/edit?usp=sharing](https://docs.google.com/document/d/1UusLQ0YVF88XU1lfsWYgqSTTBe9FSG6c65Mlehg2fqc/edit?usp=sharing)
+
+*   **Présentation du Projet:** [https://gamma.app/docs/Untitled-k5cnybpu8oa2eh2](https://gamma.app/docs/Untitled-k5cnybpu8oa2eh2)
+
+*   **Application Streamlit:** [https://ai-article-summarizer.streamlit.app/](https://ai-article-summarizer.streamlit.app/)
+
+*   **Version Web Professionnelle:** [https://ai-summurizer.vercel.app/](https://ai-summurizer.vercel.app/)
+
 | Modèle    | Fournisseur   | Points forts                                                                                                                                                                                |
 | :-------- | :------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Pegasus   | Hugging Face  | Spécialisé dans les news, très performant sur la presse.  Bon rapport qualité/vitesse.                                                                                                           |
