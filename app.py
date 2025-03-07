@@ -7,36 +7,39 @@ import os
 
 # Charger les variables d'environnement
 load_dotenv()
-HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
-
-HEADERS = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 # Liste des modèles supportés
 MODELS = {
     "pegasus": "google/pegasus-cnn_dailymail",
     "bart": "facebook/bart-large-cnn",
-    "flan-t5": "google/flan-t5-large",
-    "distilbart": "sshleifer/distilbart-cnn-12-6",
-    "t5": "t5-base",
-    "longt5": "google/long-t5-tglobal-base",
-    "led": "allenai/led-base-16384",
-    "mbart": "facebook/mbart-large-50",
-    "mistral": "mistralai/Mistral-7B-Instruct-v0.2",
-    "llama2": "meta-llama/Llama-2-7b-chat",
+    "mistral": "mixtral-8x7b-32768",
+    "llama": "llama-3.3-70b-versatile", 
 }
 
 app = FastAPI()
-
 
 class ArticleRequest(BaseModel):
     url: str = None
     text: str = None
     model: str = "pegasus"
 
-
 def get_summary(article_text, model_name):
+    # Vérifier si le modèle est un modèle Groq ou Hugging Face
     if model_name not in MODELS:
         raise HTTPException(status_code=400, detail=f"Modèle non supporté: {model_name}")
+    
+    # Si le modèle est Mistral ou Llama, utiliser Groq
+    if model_name in ["mistral", "llama"]:
+        return get_summary_from_groq(article_text, model_name)
+    
+    # Si le modèle est sur Hugging Face, on fait un appel classique
+    return get_summary_from_huggingface(article_text, model_name)
+
+def get_summary_from_huggingface(article_text, model_name):
+    # Utilisation de l'API Hugging Face (ancienne méthode)
+    HUGGINGFACE_API_KEY = os.getenv("HUGGINGFACE_API_KEY")
+    HEADERS = {"Authorization": f"Bearer {HUGGINGFACE_API_KEY}"}
     
     api_url = f"https://api-inference.huggingface.co/models/{MODELS[model_name]}"
     payload = {"inputs": article_text}
@@ -51,6 +54,34 @@ def get_summary(article_text, model_name):
     
     raise HTTPException(status_code=500, detail="Résumé non disponible")
 
+def get_summary_from_groq(article_text, model_name):
+    # Utilisation de l'API Groq pour Mistral ou Llama
+    GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+    
+    # Préparer les données pour l'API Groq
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {GROQ_API_KEY}"
+    }
+    
+    data = {
+        "model": MODELS[model_name],
+        "messages": [{
+            "role": "system",
+            "content": "Tu es un résuméur d'articles de presse. Fais de super résumés."
+        }, {
+            "role": "user",
+            "content": article_text
+        }]
+    }
+    
+    response = requests.post(GROQ_API_URL, headers=headers, json=data)
+    result = response.json()
+    
+    if response.status_code == 200 and 'choices' in result:
+        return result['choices'][0]['message']['content']
+    else:
+        raise HTTPException(status_code=500, detail=f"Erreur Groq: {result.get('error', 'Inconnue')}")
 
 @app.post("/resume")
 def resume_article(request: ArticleRequest):
@@ -82,36 +113,12 @@ def resume_article(request: ArticleRequest):
 
     raise HTTPException(status_code=400, detail="Ni URL ni texte fournis")
 
-
 @app.get("/health")
 def health_check():
-    """Vérifie si tous les modèles sont dispos et gère les erreurs comme l'authentification, timeout, etc."""
+    """Vérifie si tous les modèles sont dispos"""
     statuses = {}
-
-    # On parcourt chaque modèle et on fait une requête GET pour vérifier sa disponibilité
     for name, model_path in MODELS.items():
-        try:
-            # Essayer d'obtenir la réponse du modèle
-            response = requests.get(f"https://api-inference.huggingface.co/models/{model_path}", headers=HEADERS, timeout=10)
-
-            # Vérification de la réponse en fonction du code de statut
-            if response.status_code == 200:
-                statuses[name] = "OK"
-            elif response.status_code == 403:
-                statuses[name] = "Accès interdit (erreur d'authentification)"
-            elif response.status_code == 404:
-                statuses[name] = "Modèle non trouvé"
-            elif response.status_code == 500:
-                statuses[name] = "Erreur serveur interne"
-            else:
-                statuses[name] = f"Erreur inconnue: {response.status_code}"
-        
-        except requests.exceptions.Timeout:
-            statuses[name] = "Erreur: Timeout (Le serveur met trop de temps à répondre)"
-        except requests.exceptions.TooManyRedirects:
-            statuses[name] = "Erreur: Trop de redirections"
-        except requests.exceptions.RequestException as e:
-            # Gestion générale de toutes les autres erreurs
-            statuses[name] = f"Erreur de requête: {str(e)}"
+        response = requests.get(f"https://api-inference.huggingface.co/models/{model_path}", headers=HEADERS)
+        statuses[name] = "ok" if response.status_code == 200 else "indisponible"
 
     return statuses

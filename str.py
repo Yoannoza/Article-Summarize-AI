@@ -46,8 +46,7 @@ def generate_summary(data):
 
 # Liste des modèles disponibles
 models = [
-    "pegasus", "bart", "flan-t5", "distilbart", "t5", 
-    "longt5", "led", "mbart", "mistral", "llama2"
+    "pegasus", "bart", "mistral", "llama"
 ]
 
 if option == "Résumé d'un article via URL":
