@@ -1,126 +1,129 @@
-# Resumeur Automatique d'Articles - API Flask
+# 📰 Résumeur Automatique d'Articles - FastAPI + Streamlit
 
-Ce projet est une API REST construite avec Flask permettant de résumer automatiquement des articles à partir d'une URL. Elle utilise le modèle PEGASUS de Google pré-entraîné sur CNN/DailyMail pour générer des résumés pertinents.
+## 🚀 Présentation
 
-## Fonctionnalités
+Lie
+https://gamma.app/docs/Untitled-k5cnybpu8oa2eh2
 
-- Extraire le contenu d'un article à partir d'une URL.
-- Générer automatiquement un résumé pertinent.
-- Utilise Hugging Face Inference API pour des performances optimales.
-- Interface REST simple via Flask.
 
-## Prérequis
+Ce projet propose une **API web** et une **interface utilisateur Streamlit** pour **résumer automatiquement des articles de presse** ou tout autre texte. L’utilisateur peut soit **fournir une URL d’article**, soit **coller un texte** directement. Le résumé est généré par **l'un des 4 modèles supportés**, sélectionnables à la demande :
 
-- Python 3.x
-- Compte sur [Hugging Face](https://huggingface.co/)
+| Modèle    | Fournisseur   | Points forts                                                                                                                                                                                |
+| :-------- | :------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Pegasus   | Hugging Face  | Spécialisé dans les news, très performant sur la presse.  Bon rapport qualité/vitesse.                                                                                                           |
+| BART      | Hugging Face  | Concis et précis, bon équilibre global.  Idéal pour des résumés équilibrés.                                                                                                                |
+| Mistral   | Groq          | Ultra rapide, performant sur textes variés.  Choix parfait pour une latence minimale.                                                                                                     |
+| Llama 2   | Groq          | Modèle large, excellente qualité sur textes longs et complexes.  Privilégiez ce modèle pour les textes qui nécessitent une compréhension approfondie.                                    |
 
-## Installation
+---
 
-1. Cloner le dépôt :
+## 🏗️ Architecture
+
+### 📦 Composants
+
+- **FastAPI** : Back-end exposant l’API `/resume`.
+- **Streamlit** : Interface utilisateur simple pour tester les résumés.
+- **Hugging Face Inference API** : Utilisé pour Pegasus et BART.
+- **Groq API** : Utilisé pour Mistral et Llama 2.
+- **Newspaper3k**: Extraction d'articles à partir d'URLs.
+
+---
+
+### 🔗 Flux de fonctionnement
+
+1. L’utilisateur choisit entre "URL" ou "Texte libre" dans l'interface Streamlit.
+2. Le texte (ou le contenu extrait de l’URL) est transmis à l’API FastAPI.
+3. Selon le modèle choisi :
+    - Pegasus/BART : Appel à la Hugging Face Inference API.
+    - Mistral/Llama 2 : Appel à la Groq API.
+4. Le résumé est retourné à l’utilisateur via l'interface Streamlit.
+
+---
+
+## ⚙️ Installation
+
+### 1️⃣ Cloner le projet
 
 ```bash
-git clone https://github.com/tonpseudo/resumeur-automatique-api.git
-cd resumeur-automatique-api
+git clone https://github.com/votre-repo/resumeur-articles.git
+cd resumeur-articles
 ```
 
-2. Installer les dépendances :
+2️⃣ Créer un environnement virtuel
+```bash
+python -m venv venv
+source venv/bin/activate   # Linux/macOS
+# ou
+venv\Scripts\activate      # Windows
+```
 
+
+3️⃣ Installer les dépendances
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Créer un fichier `.env` pour stocker la clé API Hugging Face :
+4️⃣ Configurer les clés API
 
+Créer un fichier .env à la racine du projet :
+```bash
+touch .env
 ```
-HUGGINGFACE_API_KEY=ton_token_huggingface
-```
-
-## Utilisation
-
-### Lancer le serveur
+Ajouter les clés API dans le fichier .env :
 
 ```bash
-python app.py
+HUGGINGFACE_API_KEY=your_huggingface_api_key
+GROQ_API_KEY=your_groq_api_key
 ```
 
-Par défaut, le serveur tourne sur `http://127.0.0.1:5000`.
+Important: Remplacez your_huggingface_api_key et your_groq_api_key par vos clés API réelles.
 
-### Effectuer une requête
 
-Exemple avec `curl` :
+▶️ Lancer le projet
 
+Démarrer l’API FastAPI :
 ```bash
-curl -X POST http://127.0.0.1:5000/resume \  
--H "Content-Type: application/json" \  
--d '{"url": "https://exemple.com/article"}'
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-Exemple de réponse :
+Lancer l’interface utilisateur Streamlit :
+```bash
+streamlit run app/interface.py
+```
 
+📡 Endpoints
+Résumer un article (API)
+Méthode: POST
+Endpoint: /resume
+Corps de la requête (JSON)
+Pour une URL :
 ```json
 {
-  "title": "Titre de l'article",
-  "url": "https://exemple.com/article",
-  "resume": "Résumé généré ici."
+    "url": "https://exemple.com/article",
+    "text": null,
+    "model": "pegasus"
+}
+```
+Pour un texte brut :
+```json
+{
+    "url": null,
+    "text": "Voici un texte à résumer...",
+    "model": "mistral"
 }
 ```
 
-## Déploiement
+Paramètres :
+url: (string, optionnel) L'URL de l'article à résumer. Doit être null si text est fourni.
+text: (string, optionnel) Le texte à résumer. Doit être null si url est fourni.
+model: (string, requis) Le modèle à utiliser pour le résumé. Les options sont: pegasus, bart, mistral, llama.
 
-### Sur Railway.app
 
-1. Créer un fichier `Procfile` :
+🌐 Interface utilisateur (Streamlit)
+L’interface Streamlit permet :
+De coller une URL ou un texte brut.
+De choisir le modèle à utiliser.
+De comparer les résumés obtenus avec chaque modèle (fonctionnalité À venir).
 
-```
-web: python app.py
-```
 
-2. Pousser le projet sur GitHub.
-3. Sur [Railway.app](https://railway.app/), créer un projet, connecter le repo GitHub et déployer.
-
-### Utiliser Hugging Face API
-
-Ce projet est conçu pour utiliser l'Inference API de Hugging Face avec le modèle :
-
-- Modèle utilisé : [google/pegasus-cnn_dailymail](https://huggingface.co/google/pegasus-cnn_dailymail)
-
-## Configuration Personnalisée
-
-Si vous avez fine-tuné votre propre modèle Pegasus sur Hugging Face, remplacez l'URL de l'API dans `app.py` :
-
-```python
-API_URL = "https://api-inference.huggingface.co/models/votre-utilisateur/votre-modele"
-```
-
-## Technologies Utilisées
-
-- Flask
-- Hugging Face Transformers
-- Newspaper3k
-- PEGASUS
-
-## Structure du Projet
-
-```
-.
-├── app.py
-├── requirements.txt
-├── Procfile
-├── README.md
-└── .env
-```
-
-## Améliorations Futures
-
-- Ajouter la gestion des langues multiples (mBART, Mistral, etc.).
-- Intégrer la possibilité de choisir le modèle via la requête.
-- Déploiement avec Docker.
-
-## Auteur
-
-- [Ton Nom](https://github.com/tonpseudo)
-
-## Licence
-
-Ce projet est sous licence MIT.
 
