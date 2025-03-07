@@ -4,6 +4,7 @@ import requests
 from newspaper import Article
 from dotenv import load_dotenv
 import os
+from fastapi.middleware.cors import CORSMiddleware
 
 # Charger les variables d'environnement
 load_dotenv()
@@ -18,6 +19,15 @@ MODELS = {
 }
 
 app = FastAPI()
+
+# Ajouter CORSMiddleware pour permettre les requêtes CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Autoriser toutes les origines (ou spécifie des origines précises comme ["https://ton-front-end.com"])
+    allow_credentials=True,
+    allow_methods=["*"],  # Permet toutes les méthodes (GET, POST, OPTIONS, etc.)
+    allow_headers=["*"],  # Permet tous les headers
+)
 
 class ArticleRequest(BaseModel):
     url: str = None
