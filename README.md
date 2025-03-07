@@ -18,7 +18,7 @@ Voici une liste des liens importants pour accéder aux différentes composantes 
 
 *   **Application Streamlit:** [https://ai-article-summarizer.streamlit.app/](https://ai-article-summarizer.streamlit.app/)
 
-*   **Version Web Professionnelle:** [https://ai-summurizer.vercel.app/](https://ai-summurizer.vercel.app/)
+*   **Version Web Professionnelle:** [https://ai-summurizer.vercel.app/](https://ai-summurizer.vercel.app/) (Quelques bugs trainent)
 
 | Modèle    | Fournisseur   | Points forts                                                                                                                                                                                |
 | :-------- | :------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
